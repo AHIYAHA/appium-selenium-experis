@@ -31,3 +31,8 @@ class SimpleCalculator:
         """
         return self.driver.find_element(By.CSS_SELECTOR, f"""[onclick="r({name})"]""")
 
+    def clicks(self, *buttons):
+        self.button("'C'").click()
+        for button in buttons:
+            self.button(button).click()
+

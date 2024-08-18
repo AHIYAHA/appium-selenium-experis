@@ -50,11 +50,8 @@ class TestCalculator(unittest.TestCase):
         factors = self.factorization_calculator.calculation(num)
 
         # multiplies all the prime factors in the calculator application
-        for factor in factors:
-            self.mobile_calculator.enter_num(factor.strip())
-            self.mobile_calculator.op("mul").click()
-        self.mobile_calculator.enter_num(1)  # use the last division sign
-        self.mobile_calculator.element("eq").click()
+        self.mobile_calculator.operation(factors, "mul")
+
         self.assertEqual(self.mobile_calculator.element("result_final").text.strip(), str(num))
 
     def test_prime_number(self):
@@ -66,8 +63,9 @@ class TestCalculator(unittest.TestCase):
         num = 101
 
         # verify that it is a prime number by the calculator application
-        for i in [2, 3, 5, 7]:  # rest prime numbers to sqrt(1000):, 11, 13, 17, 19, 23, 29, 31]:
-            dividing = self.mobile_calculator.operation(num, i, "div")
+        primes_sqrt_1000 = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]  # all prime numbers to sqrt(1000)
+        for prime in primes_sqrt_1000[:4]:  # continue when num is bigger
+            dividing = self.mobile_calculator.operation([num, prime], "div")
             self.assertNotEqual(dividing, int(dividing))
             self.assertNotEqual(1, dividing)
 
@@ -92,7 +90,7 @@ class TestCalculator(unittest.TestCase):
 
         # in the calculator application verifies that dividing the given number by every prime factor results in integer
         for factor in set(factors):  # every different factor
-            dividing = self.mobile_calculator.operation(num, factor.strip(), "div")
+            dividing = self.mobile_calculator.operation([num, factor.strip()], "div")
             self.assertEqual(dividing, int(dividing))
 
     def test_square_number(self):
@@ -124,19 +122,11 @@ class TestCalculator(unittest.TestCase):
         """
         calc = self.simple_calculator
         calc.driver.get("https://www.calculator.net/")
-        calc.button("'C'").click()
-        calc.button("'log'").click()
-        calc.button(randint(0, 9)).click()
-        calc.button("'+/-'").click()
-        calc.button("'='").click()
+        calc.clicks("'log'", randint(0, 9), "'+/-'", "'='")
         self.assertEqual(calc.output().text.lower().strip(), "error")
 
         calc = self.mobile_calculator
-        calc.element("collapse_expand").click()
-        calc.fun("log").click()
-        calc.op("sub").click()
-        calc.enter_num(randint(0, 9))
-        calc.element("eq").click()
+        calc.clicks("collapse_expand", "fun_log", "op_sub", randint(0, 9), "eq")
         self.assertEqual(calc.element("result_preview").text[-5:], "error")
 
     # test for fraction calculator page
@@ -150,5 +140,5 @@ class TestCalculator(unittest.TestCase):
         num, result = calc.before_calculation().text, calc.after_calculation()
 
         calc = self.mobile_calculator
-        calc.operation(num, 1, "mul")  # multiplies in 1 so that the number's presentation will be converted
+        calc.operation([num, 1], "mul")  # multiplies in 1 so that the number's presentation will be converted
         self.assertEqual(result, calc.result_in_fraction())  # compares between the results

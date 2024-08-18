@@ -39,16 +39,16 @@ class MobileCalculator:
         """
         return self.element(f"fun_{function}")
 
-    def operation(self, a, b, op: str):
+    def operation(self, numbers: list, op: str):
         """
         clicks on all the required buttons on a calculator to perform an operation and returns the result.
         the optional operations: div, mul, sub, add, pow
         """
         self.element("clr").click()
-        a, b = str(a), str(b)
-        self.enter_num(a)
-        self.op(op).click()
-        self.enter_num(b)
+        for num in numbers[:-1]:
+            self.enter_num(num.strip())
+            self.op(op).click()
+        self.enter_num(numbers[-1])
         self.element("eq").click()
         return float(self.element("result_final").text)
 
@@ -70,3 +70,7 @@ class MobileCalculator:
         return {"integer": result[:space],
                 "numerator": result[space + 1: slash],
                 "denominator": result[slash+1:]}
+
+    def clicks(self, *buttons):
+        for button in buttons:
+            self.element(button).click()
